@@ -1,0 +1,181 @@
+# "docker compose up" to start all services without development services
+# "docker compose --profile development up" to start all services including development services (openwebui, piper trainer and microwakeword trainer)
+
+x-shared-properties: &shared-properties
+  runtime: nvidia                 # Use NVIDIA runtime
+  init: false                     # Do not use init process
+  restart: unless-stopped         # Restart policy
+  network_mode: host              # Use host network mode, to auto-detect devices in network
+  #devices:
+  #  - /dev/snd:/dev/snd           # to share audio devices
+  #  - /dev/bus/usb                # to share usb devices
+
+x-shared-properties: &shared-properties-development
+  runtime: nvidia                 # Use NVIDIA runtime
+  init: false                     # Do not use init process
+  restart: no                     # Restart policy
+  network_mode: host              # Use host network mode, to auto-detect devices in network
+
+name: ha-voice-pipeline-jetson
+version: "1.0"
+services:
+#  homeassistant:
+#  # https://github.com/dusty-nv/jetson-containers
+#    image: dustynv/homeassistant-core:latest-r36.2.0
+#    <<: *shared-properties
+#    container_name: homeassistant
+#    hostname: homeassistant
+#    ports:
+#      - "8123:8123"
+#    volumes:
+#      - ha-config:/config
+#      - /etc/localtime:/etc/localtime:ro
+#      - /etc/timezone:/etc/timezone:ro
+
+#  assist-microphone:
+#  # https://github.com/dusty-nv/jetson-containers
+#    image: dustynv/wyoming-assist-microphone:latest-r36.2.0
+#    <<: *shared-properties
+#    container_name: assist-microphone
+#    hostname: assist-microphone
+#    depends_on:
+#      - homeassistant
+#      - openwakeword
+#    ports:
+#      - "10700:10700/tcp"
+#    volumes:
+#      - /etc/localtime:/etc/localtime:ro
+#      - /etc/timezone:/etc/timezone:ro
+#    environment:
+#      SATELLITE_AUDIO_DEVICE: "plughw:CARD=S330,DEV=0"
+#      SATELLITE_SND_VOLUME_MULTIPLIER: 0.3
+#      ASSIST_PIPELINE_NAME: "Home Assistant"
+#      WAKEWORD_NAME: ok_nabu
+
+#  openwakeword:
+#  # https://github.com/dusty-nv/jetson-containers
+#    image: dustynv/wyoming-openwakeword:latest-r36.2.0
+#    <<: *shared-properties
+#    container_name: openwakeword
+#    hostname: openwakeword
+#    depends_on:
+#      - faster-whisper
+#    ports:
+#      - "10400:10400/tcp"
+#    volumes:
+#      - ha-openwakeword-custom-models:/share/openwakeword
+#      - /etc/localtime:/etc/localtime:ro
+#      - /etc/timezone:/etc/timezone:ro
+#    environment:
+#      OPENWAKEWORD_CUSTOM_MODEL_DIR: /share/openwakeword
+#      OPENWAKEWORD_PRELOAD_MODEL: ok_nabu
+
+  faster-whisper:
+  # https://github.com/dusty-nv/jetson-containers
+    image: dustynv/wyoming-whisper:latest-r36.2.0
+    <<: *shared-properties
+    container_name: faster-whisper
+    hostname: faster-whisper
+    ports:
+      - "10300:10300/tcp"
+    volumes:
+      - ha-whisper-models:/share/whisper
+      - ha-whisper-data:/data
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    environment:
+      WHISPER_MODEL: "medium-int8"      # default model to run > TBD
+      WHISPER_LANGUAGE: "de"            # default language to run
+
+  piper-tts:
+  # https://github.com/dusty-nv/jetson-containers
+    image: dustynv/wyoming-piper:master-r36.2.0
+    <<: *shared-properties
+    container_name: piper-tts
+    hostname: piper-tts
+    ports:
+      - "10200:10200/tcp"
+    volumes:
+      - ha-piper-tts-models:/data/models/piper
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    environment:
+      PIPER_VOICE: "de_DE-thorsten-high"  # default voice > TBD
+
+  ollama:
+  # https://github.com/dusty-nv/jetson-containers
+    image: dustynv/ollama:main-r36.4.0
+    <<: *shared-properties
+    container_name: ollama
+    hostname: ollama
+    volumes:
+        - ha-ollama-models:/ollama
+    environment:
+        - OLLAMA_MODELS=/ollama
+        - OLLAMA_MODEL=llama3.2     # default model to run (possible models with tools are mistral:7b (32K context), llama3.2:3b (128K) and qwen3:4b/8b (40K)) > TBD
+
+  open-webui:
+  # https://github.com/open-webui/open-webui
+    image: ghcr.io/open-webui/open-webui:${WEBUI_DOCKER_TAG-main}
+    <<: *shared-properties-development
+    container_name: open-webui
+    hostname: open-webui
+    profiles: ["development"]       # only started with "docker compose --profile development up"
+    volumes:
+      - ha-open-webui-data:/app/backend/data
+    environment:
+      - 'OLLAMA_BASE_URL=http://ollama:11434'
+      - 'WEBUI_SECRET_KEY='
+    stdin_open: true
+    tty: true
+    ports:
+      - ${OPEN_WEBUI_PORT-3000}:8080
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    depends_on:
+      - ollama
+
+  piper-trainer:
+  # https://github.com/domesticatedviking/TextyMcSpeechy
+    image: domesticatedviking/textymcspeechy-piper
+    <<: *shared-properties-development
+    container_name: piper-trainer
+    hostname: piper-trainer
+    profiles: ["development"]       # only started with "docker compose --profile development up"
+    volumes:
+      - ha-textymcspeechy-data:/app/tts_dojo
+    environment:
+      - PUID=${TMS_USER_ID:-1000}   #TMS_USER_ID is set by run_training.sh to avoid permissions issues
+      - PGID=${TMS_GROUP_ID:-1000}
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+    user: "${TMS_USER_ID:-1000}:${TMS_GROUP_ID:-1000}"
+    stdin_open: true
+    tty: true
+    ports:
+      - "6006:6006"  # open tensorboard server port
+
+  microwakeword-trainer:
+  # https://github.com/MasterPhooey/MicroWakeWord-Trainer-Docker
+    image: masterphooey/microwakeword-trainer
+    <<: *shared-properties-development
+    container_name: microwakeword-trainer
+    hostname: microwakeword-trainer
+    profiles: ["development"]       # only started with "docker compose --profile development up"
+    volumes:
+      - ha-wakewordtrainer-data:/data
+    stdin_open: true
+    tty: true
+    ports:
+      - "8888:8888"                 # expose jupiter notebook on port 8888
+
+volumes:
+#  ha-config:                      # Home Assistant configuration volume
+#  ha-openwakeword-custom-models:  # Volume for OpenWakeWord custom models
+  ha-piper-tts-models:            # Volume for Piper TTS models
+  ha-whisper-models:              # Volume for Faster Whisper models
+  ha-whisper-data:                # Volume for Faster Whisper data
+  ha-ollama-models:               # Volume for Ollama models
+  ha-open-webui-data:             # Volume for Open WebUI data
+  ha-textymcspeechy-data:         # Volume for TextyMcSpeechy Piper data
+  ha-wakewordtrainer-data:        # Volume for Microwakeword trainer data
