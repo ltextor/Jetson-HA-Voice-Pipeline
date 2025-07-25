@@ -50,6 +50,8 @@ This repository provides a Docker Compose setup for running a Home Assistant voi
   Jupyter-based training notebook for custom wake words. These wakewords can be used e.g. on the Home Assistant Voice Preview Edition. The Google Colab version was not working for me because of broken dependencies (Python version).
   Based on container from [MasterPhooey - MicroWakeWord-Trainer-Docker](https://github.com/MasterPhooey/MicroWakeWord-Trainer-Docker).
 
+---
+
 #### Notes
 
 - The compose file is optimized for NVIDIA Jetson devices and uses the `nvidia` runtime.
