@@ -33,7 +33,7 @@ This repository provides a Docker Compose setup for running a Home Assistant voi
   Based on container and compose.yaml from [dusty-nv - Jetson containers](https://github.com/dusty-nv/jetson-containers/tree/master/packages/smart-home/wyoming/wyoming-piper).
 
 - **ollama**  
-  LLM inference (e.g., Llama 3, Mistral, Qwen).
+  LLM inference (e.g., Llama 3.2, Phi-4-mini, Mistral, Qwen 3).
   Based on container from [dusty-nv - Jetson containers](https://github.com/dusty-nv/jetson-containers/tree/master/packages/llm/ollama).
 
 **Development Services** (only with `--profile development`):

@@ -112,7 +112,7 @@ services:
         - ha-ollama-models:/ollama
     environment:
         - OLLAMA_MODELS=/ollama
-        - OLLAMA_MODEL=llama3.2     # default model to run (possible models with tools are mistral:7b (32K context), llama3.2:3b (128K) and qwen3:4b/8b (40K)) > TBD
+        - OLLAMA_MODEL=llama3.2     # default model to run (possible models with tools are mistral:7b (32K context), llama3.2:3b (128K), phi4-mini:3.8b (128K) and qwen3:4b/8b (40K)) > TBD
 
   open-webui:
   # https://github.com/open-webui/open-webui
