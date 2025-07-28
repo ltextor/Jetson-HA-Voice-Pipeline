@@ -1,5 +1,5 @@
 # Jetson HA Voice Pipeline
- Running a local voice pipeline on a Jetson Orin Nano
+ Running a local voice pipeline for Home Assistant on a Jetson Orin Nano
 
 **work in progress - not tested yet on Jetson**
 
