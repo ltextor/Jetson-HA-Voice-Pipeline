@@ -17,6 +17,10 @@ This repository provides a Docker Compose setup for running a Home Assistant voi
   ```
   docker compose --profile development up
   ```
+- To start a specific service, run:
+  ```
+  docker compose start piper-trainer
+  ```
 
 ---
 
