@@ -10,7 +10,7 @@ x-shared-properties: &shared-properties
   #  - /dev/snd:/dev/snd           # to share audio devices
   #  - /dev/bus/usb                # to share usb devices
 
-x-shared-properties: &shared-properties-development
+x-shared-properties-development: &shared-properties-development
   runtime: nvidia                 # Use NVIDIA runtime
   init: false                     # Do not use init process
   restart: no                     # Restart policy
