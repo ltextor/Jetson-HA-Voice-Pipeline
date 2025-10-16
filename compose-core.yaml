@@ -1,0 +1,27 @@
+# "docker compose up" to start all services
+
+x-shared-properties: &shared-properties
+  runtime: nvidia                 # Use NVIDIA runtime
+  init: false                     # Do not use init process
+  restart: unless-stopped         # Restart policy
+
+name: ha-voice-pipeline-jetson
+version: "1.0"
+services:
+  ollama:
+  # https://github.com/dusty-nv/jetson-containers/tree/master/packages/llm/ollama
+    image: dustynv/ollama:main-r36.4.0
+    <<: *shared-properties
+    container_name: ollama
+    hostname: ollama
+    volumes:
+      - ollama-models:/ollama
+    environment:
+      - OLLAMA_MODELS=/ollama
+    stdin_open: true
+    tty: true
+    ports:
+      - 11434:11434
+
+volumes:
+  ollama-models:               # Volume for Ollama models

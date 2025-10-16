@@ -1,0 +1,29 @@
+# "docker compose up" to start all services
+
+x-shared-properties: &shared-properties
+  runtime: nvidia                 # Use NVIDIA runtime
+  init: false                     # Do not use init process
+  restart: unless-stopped         # Restart policy
+
+name: ha-voice-pipeline-jetson-development
+version: "1.0"
+services:
+  open-webui:
+  # https://github.com/open-webui/open-webui
+    image: ghcr.io/open-webui/open-webui:main
+    <<: *shared-properties-development
+    container_name: open-webui
+    hostname: open-webui
+    volumes:
+      - open-webui:/app/backend/data
+    stdin_open: true
+    tty: true
+    ports:
+      - 3000:8080
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    depends_on:
+      - ollama
+
+volumes:
+  open-webui:             # Volume for Open WebUI data
