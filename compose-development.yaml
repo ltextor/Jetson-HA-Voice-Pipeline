@@ -25,6 +25,3 @@ services:
 
 volumes:
   open-webui-data:             # Volume for Open WebUI data
-
-
-
