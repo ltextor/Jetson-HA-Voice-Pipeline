@@ -15,7 +15,7 @@ services:
     container_name: open-webui
     hostname: open-webui
     volumes:
-      - open-webui:/app/backend/data
+      - open-webui-data:/app/backend/data
     stdin_open: true
     tty: true
     ports:
@@ -26,4 +26,5 @@ services:
       - ollama
 
 volumes:
-  open-webui:             # Volume for Open WebUI data
+  open-webui-data:             # Volume for Open WebUI data
+
