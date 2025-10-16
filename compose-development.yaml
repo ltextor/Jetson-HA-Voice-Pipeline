@@ -1,4 +1,4 @@
-# "docker compose up" to start all services
+# "docker compose -f compose-development.yaml up" to start all services
 
 x-shared-properties: &shared-properties
   runtime: nvidia                 # Use NVIDIA runtime

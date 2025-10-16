@@ -1,4 +1,4 @@
-# "docker compose up" to start all services
+# "docker compose -f compose-core.yaml up" to start all services
 
 x-shared-properties: &shared-properties
   runtime: nvidia                 # Use NVIDIA runtime
@@ -18,10 +18,45 @@ services:
       - ollama-models:/ollama
     environment:
       - OLLAMA_MODELS=/ollama
-    stdin_open: true
-    tty: true
+    stdin_open: true  # needed e.g. to login when using cloud models
+    tty: true         # needed e.g. to login when using cloud models
     ports:
       - 11434:11434
 
+  wyoming-whisper:
+  # https://github.com/dusty-nv/jetson-containers/tree/master/packages/smart-home/wyoming/wyoming-whisper
+    image: dustynv/wyoming-whisper:2.3.0-r36.4.0
+    <<: *shared-properties
+    container_name: wyoming-whisper
+    hostname: wyoming-whisper
+    volumes:
+      - whisper-models:/share/whisper
+      - whisper-data:/data
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    environment:
+        - WHISPER_MODEL=medium-int8
+        - WHISPER_LANGUAGE=de
+    ports:
+      - 10300:10300
+
+  wyoming-piper:
+  # https://github.com/dusty-nv/jetson-containers/tree/master/packages/smart-home/wyoming/wyoming-piper
+    image: dustynv/wyoming-piper:master-r36.2.0
+    <<: *shared-properties
+    container_name: wyoming-piper
+    hostname: wyoming-piper
+    volumes:
+      - piper-models:/data/models/piper
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    environment:
+      - PIPER_VOICE=de_DE-thorsten-high
+    ports:
+      - 10200:10200
+
 volumes:
   ollama-models:               # Volume for Ollama models
+  whisper-models:              # Volume for Whisper models
+  whisper-data:                # Volume for Whisper data
+  piper-models:                # Volume for Piper models
