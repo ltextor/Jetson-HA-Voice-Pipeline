@@ -9,11 +9,11 @@ This repository provides a Docker Compose setup for running a Home Assistant voi
 
 #### Files
 
-- compose-core.yaml
+- compose-core.yaml:
   Contains the core services Whisper, Piper and Ollama
-- compose-development.yaml
+- compose-development.yaml:
   Contains development tools (currentyl only Open WebUI)
-- compose.yaml
+- compose.yaml:
   Old version, only kept until all development tools are migrated to compose-development.yaml
 
 ---
