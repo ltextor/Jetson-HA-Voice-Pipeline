@@ -1,7 +1,7 @@
 # Jetson HA Voice Pipeline
  Running a local voice pipeline for Home Assistant on a Jetson Orin Nano
 
-**work in progress - only core tested yet on Jetson**
+**work in progress**
 
 This repository provides a Docker Compose setup for running a Home Assistant voice pipeline on NVIDIA Jetson devices. The stack includes services for speech-to-text, text-to-speech, LLMs, and development tools, all optimized for Jetson hardware. Home Assistant is supposed to run on another hardware and connect to these services through the Wyoming protocol, but can be run on Jetson too if the corresponding containers are enabled.
 
