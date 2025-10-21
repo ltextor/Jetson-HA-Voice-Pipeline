@@ -69,7 +69,7 @@ This repository provides a Docker Compose setup for running a Home Assistant voi
 
 #### Notes
 
-- The compose files are optimized for NVIDIA Jetson devices and uses the `nvidia` runtime.
+- The compose files are optimized for NVIDIA Jetson devices and use the `nvidia` runtime.
 - Some services (like Home Assistant, Assist Microphone, and OpenWakeWord) are present but commented out. Uncomment and configure as needed.
 
 ---
